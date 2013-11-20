@@ -44,15 +44,15 @@ glm::mat4x4 normalMatrix;
 bool useTexture = true;
 bool useMove = true; 
 
-const int numPlanets = 1; 
+const int numPlanets = 2; 
 const char * paths[] = {"C:\\task3\\src\\models\\sun.bmp", "C:\\task3\\src\\models\\earth.bmp"};
-GLubyte * imgData; 
+GLubyte * imgData[numPlanets]; 
 MyObject *planets;
-float plantetsCenters[][3] = {{0, 0, 0}, {1, 1, 0}};
-float planetsSpeed[] = {0, 0.03};
+float plantetsCenters[][3] = {{0, 0, -4}, {3, 0, -4}};
+float planetsSpeed[] = {0.00, 0.03};
 
 //texture identificator
-GLuint texId;
+GLuint *texId;
 
 //names of shader files. program will search for them during execution
 //don't forget place it near executable 
@@ -66,34 +66,38 @@ void initTexture()
 	//enable texturing and zero slot
     glEnable(GL_TEXTURE_2D);
 	glEnable(GL_TEXTURE0);
+	
+	texId = new GLuint[numPlanets];
 	//generate as many textures as you need
-	glGenTextures(1,&texId);
-	//make texId current 
-	glBindTexture(GL_TEXTURE_2D,texId);
-	
-	//don't use alignment
-	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-	
-	// Set nearest filtering mode for texture minification
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
+	glGenTextures(numPlanets, texId);
 	
 	const int width = 2048, height = 1024; 
 	for (int i = 0; i < numPlanets; i++)
 	{
-		imgData = new GLubyte[width * height * 3];  
+
+		//make texId current 
+		glBindTexture(GL_TEXTURE_2D, texId[i]);
+	
+		//don't use alignment
+		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	
+		// Set nearest filtering mode for texture minification
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+		imgData[i] = new GLubyte[width * height * 3];  
 		FILE * inp = fopen(paths[i], "rb"); 
-		fread(imgData, 1, width * height * 3, inp); 
+		fread(imgData[i], 1, width * height * 3, inp); 
 		for (int j = 0; j < width * height; j++)
 		{
-			swap(imgData[j * 3], imgData[j * 3 + 2]); 
+			swap(imgData[i][j * 3], imgData[i][j * 3 + 2]); 
 		}
 		fclose(inp); 
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, &imgData[i][0]);
 	}
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, &imgData[0]);
+	
 
 }
 
@@ -152,63 +156,67 @@ void display()
   //Draw triangle with shaders (in screen coordinates)
   //need to set uniform in modelViewMatrix
   
-  glUseProgram(shaderProgram.programObject);
+  for (int i = 0; i < numPlanets; i++)
+  {
 
-  //camera matrix. camera is placed in point "eye" and looks at point "cen".
-  glm::mat4x4 viewMatrix = glm::lookAt(eye,cen,up);
-  //modelMatrix is connected with current object. move planets to scene's center
-  glm::mat4x4 modelMatrix = glm::translate(glm::mat4(),glm::vec3(0,0,0));
+	  glUseProgram(shaderProgram.programObject);
 
-  static float rot = 0.0f;
-  if (useMove)
-	  rot += planets[0].getSpeed(); 
-  glm::mat4x4 rotateMatrix = glm::rotate(glm::mat4(), rot, glm::vec3(0,0,1));
+	  //camera matrix. camera is placed in point "eye" and looks at point "cen".
+	  glm::mat4x4 viewMatrix = glm::lookAt(eye,cen,up);
+	  //modelMatrix is connected with current object. move planets to scene's center
+	  glm::mat4x4 modelMatrix = glm::translate(glm::mat4(),glm::vec3(0,0,0));
+
+	  static float rot[numPlanets] = {0.0f};
+	  if (useMove)
+		  rot[i] += planets[i].getSpeed(); 
+	  glm::mat4x4 rotateMatrix = glm::rotate(glm::mat4(), rot[i], glm::vec3(0,0,1));
   
-  //modelViewMatrix consists of viewMatrix and modelMatrix
-  modelViewMatrix = viewMatrix*modelMatrix*rotateMatrix;
-  //calculate normal matrix 
-  normalMatrix = glm::inverseTranspose(modelViewMatrix);
-  //finally calculate modelViewProjectionMatrix
-  modelViewProjectionMatrix = projectionMatrix*modelViewMatrix;
+	  //modelViewMatrix consists of viewMatrix and modelMatrix
+	  modelViewMatrix = viewMatrix*modelMatrix*rotateMatrix;
+	  //calculate normal matrix 
+	  normalMatrix = glm::inverseTranspose(modelViewMatrix);
+	  //finally calculate modelViewProjectionMatrix
+	  modelViewProjectionMatrix = projectionMatrix*modelViewMatrix;
 
-  //bind texture
-  glBindTexture(GL_TEXTURE_2D,texId);
+	  //bind texture
+	  glBindTexture(GL_TEXTURE_2D, texId[i]);
   
-  //pass variables to the shaders
+	  //pass variables to the shaders
 
-  int locMV = glGetUniformLocation(shaderProgram.programObject,"modelViewMatrix");
-  if (locMV>-1)
-	  glUniformMatrix4fv(locMV,1,0,glm::value_ptr(modelViewMatrix));
-  int locN = glGetUniformLocation(shaderProgram.programObject,"normalMatrix");
-  if (locN>-1)
-	  	  glUniformMatrix4fv(locN,1,0,glm::value_ptr(normalMatrix));
+	  int locMV = glGetUniformLocation(shaderProgram.programObject,"modelViewMatrix");
+	  if (locMV>-1)
+		  glUniformMatrix4fv(locMV,1,0,glm::value_ptr(modelViewMatrix));
+	  int locN = glGetUniformLocation(shaderProgram.programObject,"normalMatrix");
+	  if (locN>-1)
+	  		  glUniformMatrix4fv(locN,1,0,glm::value_ptr(normalMatrix));
 	  
-  int locP = glGetUniformLocation(shaderProgram.programObject,"modelViewProjectionMatrix");
-  if (locP>-1)
-	  glUniformMatrix4fv(locP,1,0,glm::value_ptr(modelViewProjectionMatrix));
-  int texLoc = glGetUniformLocation(shaderProgram.programObject,"textureSampler");
-  if (texLoc>-1)
-	  glUniform1ui(texLoc,0);
-  int locFlag = glGetUniformLocation(shaderProgram.programObject,"useTexture");
-  if (locFlag>-1)
-	  glUniform1i(locFlag,useTexture);
+	  int locP = glGetUniformLocation(shaderProgram.programObject,"modelViewProjectionMatrix");
+	  if (locP>-1)
+		  glUniformMatrix4fv(locP,1,0,glm::value_ptr(modelViewProjectionMatrix));
+	  int texLoc = glGetUniformLocation(shaderProgram.programObject,"textureSampler");
+	  if (texLoc>-1)
+		  glUniform1ui(texLoc,0);
+	  int locFlag = glGetUniformLocation(shaderProgram.programObject,"useTexture");
+	  if (locFlag>-1)
+		  glUniform1i(locFlag,useTexture);
   
-  //if there is some problem
-  if (locMV<0 || locN<0 || locP<0 || texLoc <0 || locFlag<0)
-  {
-	  //not all uniforms were allocated - show blue screen.
-	  //check your variables properly. May be there is unused?
-	  glClearColor(0,0,1,1);
-	  glClear(GL_COLOR_BUFFER_BIT);
+	  //if there is some problem
+	  if (locMV<0 || locN<0 || locP<0 || texLoc <0 || locFlag<0)
+	  {
+		  //not all uniforms were allocated - show blue screen.
+		  //check your variables properly. May be there is unused?
+		  glClearColor(0,0,1,1);
+		  glClear(GL_COLOR_BUFFER_BIT);
+	  }
+	  else //draw planets
+	  {
+		  //draw object
+		  planets[i].Draw();
+	  }
   }
-  else //draw planets
-  {
-	  //draw object
-	  planets[0].Draw();
-  }
-  //end frame visualization
-  glutSwapBuffers();
-  
+	//end frame visualization
+	glutSwapBuffers();
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -290,7 +298,7 @@ int main (int argc, char* argv[])
   {
 	  cout << "Error During Initialiation: " << str << endl;
 	  delete planets;
-	  glDeleteTextures(1,&texId);
+	  glDeleteTextures(numPlanets, texId);
 	  //start main loop with empty screen
 	  glutDisplayFunc(emptydisplay);
 	  glutMainLoop();
@@ -308,6 +316,6 @@ int main (int argc, char* argv[])
   }
   //release memory
   delete planets;
-  glDeleteTextures(1,&texId);
+  glDeleteTextures(numPlanets, texId);
   return 0;
 }

@@ -116,7 +116,7 @@ void MyObject::generateData()
 			float x = smallr * cos(phi); 
 			float y = smallr * sin(phi); 
 
-			data->pos = glm::vec3(x, y, z);
+			data->pos = glm::vec3(centx + x * radius, centy + y * radius, centz + z * radius);
 			data->nor = glm::vec3(x, y, z); 
 			data->tex = glm::vec2(j * 1.0 / (cols - 1), (i + rows / 2) * 1.0 / (rows - 1)); 
 			data++; 
