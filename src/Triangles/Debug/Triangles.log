@@ -1,0 +1,47 @@
+﻿Построение начато 11/20/2013 5:40:24 PM.
+     1>Проект "C:\task3\src\Triangles\Triangles.vcxproj" в узле 2 (целевые объекты build).
+       Файл проекта содержит ToolsVersion="12.0", не поддерживаемую данной версией MSBuild. Считается, что проект имеет ToolsVersion="4.0".
+     1>InitializeBuildStatus:
+         Создание "Debug\Triangles.unsuccessfulbuild", так как было задано "AlwaysCreate".
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\freeglut\include /I..\glew\include /I..\glm /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt MyObject.cpp main.cpp
+         main.cpp
+     1>c:\task3\src\triangles\main.cpp(52): warning C4305: инициализация: усечение из "double" к "float"
+     1>c:\task3\src\triangles\main.cpp(88): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdio.h(234): см. объявление "fopen"
+         MyObject.cpp
+     1>c:\task3\src\triangles\myobject.cpp(110): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
+     1>c:\task3\src\triangles\myobject.cpp(116): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
+     1>c:\task3\src\triangles\myobject.cpp(117): warning C4244: инициализация: преобразование "double" в "float", возможна потеря данных
+         Создание кода...
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\task3\src\..\bin\Win32\Debug\Triangles.exe" /NOLOGO /LIBPATH:..\glew\lib\Release\Win32 /LIBPATH:..\freeglut\lib kernel32.lib opengl32.lib freeglut.lib glew32.lib /MANIFEST /ManifestFile:"Debug\Triangles.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\task3\bin\Win32\Debug\Triangles.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\task3\src\..\bin\Win32\Debug\Triangles.lib" /MACHINE:X86 Debug\main.obj
+         Debug\MyObject.obj
+         Debug\shader.obj
+         Debug\shaderprogram.obj
+         LINK : не найден или не выполнена сборка C:\task3\src\..\bin\Win32\Debug\Triangles.exe при последней инкрементной компоновке; выполняется полная компоновка
+         Triangles.vcxproj -> C:\task3\src\..\bin\Win32\Debug\Triangles.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"C:\task3\src\..\bin\Win32\Debug\Triangles.exe;#1" /manifest Debug\Triangles.exe.intermediate.manifest
+       PostBuildEvent:
+         copy "C:\task3\src\Triangles\\*.frag" "C:\task3\bin\Win32\Debug\\*.frag"
+         copy "C:\task3\src\Triangles\\*.vert" "C:\task3\bin\Win32\Debug\\*.vert"
+         copy "C:\task3\src\\freeglut\bin\*.dll" "C:\task3\bin\Win32\Debug\\*.dll"
+         copy "C:\task3\src\\glew\bin\Release\Win32\*.dll" "C:\task3\bin\Win32\Debug\\*.dll"
+         :VCEnd
+         C:\task3\src\Triangles\\Fragment.frag
+                 1 file(s) copied.
+         C:\task3\src\Triangles\\Vertex.vert
+                 1 file(s) copied.
+         C:\task3\src\\freeglut\bin\freeglut.dll
+                 1 file(s) copied.
+         C:\task3\src\\glew\bin\Release\Win32\glew32.dll
+                 1 file(s) copied.
+       FinalizeBuildStatus:
+         Файл "Debug\Triangles.unsuccessfulbuild" удаляется.
+         Обращение к "Debug\Triangles.lastbuildstate".
+     1>Построение проекта "C:\task3\src\Triangles\Triangles.vcxproj" завершено (целевые объекты build).
+
+Построение успешно завершено.
+
+Затраченное время: 00:00:01.38
