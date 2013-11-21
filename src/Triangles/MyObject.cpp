@@ -13,15 +13,24 @@ MyObject::MyObject():
 	speed(1), 
 	centx(0), 
 	centy(0), 
-	centz(0) {}
+	centz(0), 
+	rotSun(0), 
+	rotSelf(0) {}
 
-void MyObject::fillData(float x, float y, float z, float _speed)
+void MyObject::fillData(float x, float y, float z, float _speed, float _rotSpeed, float _radius)
 {
 	centx = x; 
 	centy = y; 
 	centz = z; 
 	speed = _speed; 
+	rotSpeed = _rotSpeed; 
+	radius = _radius; 
 	generateData();
+}
+
+glm::vec3 MyObject::getCenterVec3()
+{
+	return glm::vec3(centx, centy, centz); 
 }
 
 
@@ -82,6 +91,22 @@ void MyObject::Draw()
 	glBindVertexArray(0);
 }
 
+void MyObject::updateAngles()
+{
+	rotSun += speed; 
+	rotSelf += rotSpeed; 
+}
+
+float MyObject::getAngleAroundItself()
+{
+	return rotSelf; 
+}
+
+float MyObject::getAngleAroundSun()
+{
+	return rotSun; 
+}
+
 void MyObject::generateData()
 {
 	const double Pi = 4 * atan(1.0); 
@@ -92,8 +117,8 @@ void MyObject::generateData()
 		delete[] pIndexes;
 	}
 
-	int rows = 21; 
-	int cols = 20; 
+	int rows = 51; 
+	int cols = 50; 
 
 	dataCount = rows * cols; 
 	indexesCount = rows * cols * 6; 

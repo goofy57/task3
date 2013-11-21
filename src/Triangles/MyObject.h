@@ -17,7 +17,8 @@ class MyObject
 	VertexData* pData;	//pointer to object's internal data
 	unsigned int dataCount;
 
-	float speed, radius, centx, centy, centz; 
+	float speed, rotSpeed, radius, centx, centy, centz; 
+	float rotSun, rotSelf; 
 
 	unsigned int* pIndexes;	//pointer to indexes (list of vetrices) 
 	unsigned int indexesCount;
@@ -30,7 +31,11 @@ public:
 	~MyObject(void);
 	//function for initialization
 	void initGLBuffers(unsigned int programId, const char* posName,const char* norName,const char* texName);
-	void fillData(float x = 0.0f, float y = 0.0f, float z = 0.0f, float speed = 0.0f); 
+	void fillData(float x = 0.0f, float y = 0.0f, float z = 0.0f, float _speed = 0.0f, float _rotSpeed = 0.0f, float _radius = 1.0f); 
+	glm::vec3 getCenterVec3();
+	void updateAngles(); 
+	float getAngleAroundSun();
+	float getAngleAroundItself(); 
 	float getSpeed();
 	//function for drawing
 	void Draw();

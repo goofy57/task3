@@ -62,30 +62,34 @@ vec3 hsv2rgb(vec3 hsvColor)
 
 //TODO: you should use VertexIn.normal value to evaluate Phong Lightning for this pixel
 // 
-		
+
 void main()
 {
 	if (useTexture>0)
 		//take color from texture using texture2D
 		fragColor = vec4(texture(textureSampler,VertexIn.texcoord.xy).rgb,1);
-	else
-	{
-		//draw rainbow round
-		float dX = VertexIn.position.x + 0.5f;
-		float dY = VertexIn.position.y - 0.5f;
-		//radius to the center of square
-		float R = sqrt(dX*dX + dY*dY);
+	
 
-		//convert from Hue-Saturation-Value to Red-Green-Blue
-		vec3 rgbColor = hsv2rgb(vec3(R*360.0f,1.0f,0.5f));
-
-		//draw pixel. 4-th component is alpha-channel. use it for transparency
-		//1 is non-transparent
-		//0 is transparent
-
-		//some compilers use optimization, so use must use all attribute variables you pass to shaders
-		//for example not using VertexIn.normal in this line can cause blue screen, because normals will not allocate
-		//
-		fragColor = vec4(rgbColor.rgb,length(VertexIn.normal));//1
-	}
+	////--------------------------
+	vec4 result = vec4(0.0);
+    vec3 l;
+    
+    l = normalize(-VertexIn.position);
+    
+	vec3 e = normalize(-VertexIn.position);
+    vec3 r = normalize(-reflect(l, VertexIn.normal));
+ 
+    vec4 Iamb = vec4(0.1, 0.1, 0.1, 0.1); //ambient
+ 
+    vec4 Idiff = vec4(0.1, 0.1, 0.1, 0.1) * max(dot(VertexIn.normal, l), 0.0); //diffuse
+    Idiff = clamp(Idiff, 0.0, 0.1);
+ 
+    vec4 Ispec = vec4(0.1, 0.1, 0.1, 0.1) //specular
+                 * pow(max(dot(r, e), 0.0),
+                       0.1);
+    Ispec = clamp(Ispec, 0.0, 0.1);
+ 
+    result += Iamb + Idiff + Ispec;
+ 
+    fragColor = fragColor + result;
 }

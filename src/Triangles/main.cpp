@@ -28,11 +28,11 @@ int windowHeight = 600;
 int mouseX,mouseY;
 
 //camera position
-glm::vec3 eye(0,0,3);
+glm::vec3 eye(0.0, 0.0, 3.0);
 //reference point position
-glm::vec3 cen(0.0,0,0);
+glm::vec3 cen(0.0, 0.0, 0.0);
 //up vector direction (head of observer)
-glm::vec3 up(0,1,0);
+glm::vec3 up(0.0, 1.0, 0.0);
 
 //matrices
 glm::mat4x4 modelViewMatrix;
@@ -44,12 +44,14 @@ glm::mat4x4 normalMatrix;
 bool useTexture = true;
 bool useMove = true; 
 
-const int numPlanets = 2; 
-const char * paths[] = {"C:\\task3\\src\\models\\sun.bmp", "C:\\task3\\src\\models\\earth.bmp"};
+const int numPlanets = 4; 
+const char * paths[] = {"C:\\task3\\src\\models\\sun.bmp", "C:\\task3\\src\\models\\mercury.bmp", "C:\\task3\\src\\models\\venus.bmp", "C:\\task3\\src\\models\\earth.bmp"};
 GLubyte * imgData[numPlanets]; 
 MyObject *planets;
-float plantetsCenters[][3] = {{0, 0, -4}, {3, 0, -4}};
-float planetsSpeed[] = {0.00, 0.03};
+float plantetsCenters[][3] = {{0, 0, -10}, {3, 0, -10}, {5, 0, -10}, {7, 0, -10}};
+float radii[] = {2.0f, 1.0f, 1.0f, 1.0f};
+float planetsSpeed[] = {0.00, 0.05, 0.05, 0.08};
+float planetsRotationSpeed[] = {0.00, 0.05, 0.06, 1}; 
 
 //texture identificator
 GLuint *texId;
@@ -116,7 +118,7 @@ void init()
 
 	for (int i = 0; i < numPlanets; i++)
 	{
-		planets[i].fillData(plantetsCenters[i][0], plantetsCenters[i][1], plantetsCenters[i][2], planetsSpeed[i]); 
+		planets[i].fillData(plantetsCenters[i][0], plantetsCenters[i][1], plantetsCenters[i][2], planetsSpeed[i], planetsRotationSpeed[i], radii[i]); 
 	}
 	
 	//initialize opengl buffers and variables inside of object
@@ -166,11 +168,18 @@ void display()
 	  //modelMatrix is connected with current object. move planets to scene's center
 	  glm::mat4x4 modelMatrix = glm::translate(glm::mat4(),glm::vec3(0,0,0));
 
-	  static float rot[numPlanets] = {0.0f};
 	  if (useMove)
-		  rot[i] += planets[i].getSpeed(); 
-	  glm::mat4x4 rotateMatrix = glm::rotate(glm::mat4(), rot[i], glm::vec3(0,0,1));
-  
+		  planets[i].updateAngles();
+	  glm::mat4x4 rotateMatrix = glm::rotate(glm::mat4(), planets[i].getAngleAroundSun(), glm::vec3(0.0f,0.0f,1.0f));
+	  
+	  glm::mat4x4 rotateAroundItselfMatrix = glm::rotate(glm::mat4(), planets[i].getAngleAroundItself(), glm::vec3(0.0f,0.0f,1.0f));
+	  
+	  glm::vec3 cents = planets[i].getCenterVec3(); 
+	  glm::mat4x4 translationMatrix = glm::translate(glm::mat4(), cents); 
+	  glm::mat4x4 reverseTranslationMatrix = glm::translate(glm::mat4(), -cents);
+
+	  rotateMatrix *= translationMatrix * rotateAroundItselfMatrix * reverseTranslationMatrix; 
+
 	  //modelViewMatrix consists of viewMatrix and modelMatrix
 	  modelViewMatrix = viewMatrix*modelMatrix*rotateMatrix;
 	  //calculate normal matrix 
@@ -227,6 +236,15 @@ void update()
 	glutPostRedisplay();
 }
 
+inline float sqr(float x)
+{
+	return x * x; 
+}
+
+float len(glm::vec3 & v)
+{
+	return sqrt(sqr(v.x) + sqr(v.y) + sqr(v.z)); 
+}
 
 /////////////////////////////////////////////////////////////////////////
 ///is called when key on keyboard is pressed
@@ -236,6 +254,43 @@ void keyboard(unsigned char key, int mx, int my)
 {
 	if (key==' ')
 		useMove = !useMove;
+	if (key == 'w' || key == 246)
+	{
+		glm::vec3 v = cen - eye; 
+		
+		v /= len(v);
+		v *= 0.2; 
+
+		eye += v;
+		cen += v; 
+	}
+	if (key == 's' || key == 251) 
+	{
+		glm::vec3 v = cen - eye; 
+		v /= len(v);
+		v *= 0.2; 
+
+		eye -= v;
+		cen -= v; 
+	}
+	if (key == 'a' || key == 244)
+	{
+		glm::vec3 v = glm::cross(up, cen - eye); 
+		v /= len(v);
+		v *= 0.2; 
+
+		eye += v;
+		cen += v; 
+	}
+	if (key == 'd' || key == 226)
+	{
+		glm::vec3 v = glm::cross(up, cen - eye); 
+		v /= len(v);
+		v *= 0.2; 
+
+		eye -= v;
+		cen -= v; 
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -243,19 +298,54 @@ void keyboard(unsigned char key, int mx, int my)
 ///TODO: place camera rotations in this function
 void mouse(int button, int mode,int posx, int posy)
 {
-	if (button==GLUT_LEFT_BUTTON)
+	if (button == GLUT_LEFT_BUTTON)
 	{
 		if (mode == GLUT_DOWN)
 		{
-			useMove = !useMove;
 			mouseX = posx; mouseY = posy;
+
+			float a = mouseX - windowWidth / 2;
+			float b = - mouseY + windowHeight / 2; //up
+			
+			glm::vec3 tomove(mouseX - windowWidth / 2, - mouseY + windowHeight / 2, 0); 
+			float l = len(tomove); 
+			tomove /= l; 
+			a /= l; 
+			b /= l; 
+
+			//turn up on b
+
+			glm::vec3 v = cen - eye; 
+			cen += up * b; 
+			up -= v / 3.0f * b / 3.0f;
+
+			up /= len(up); 
+			v = cen - eye; 
+			v /= len(v); 
+			v *= 3.0; 
+			cen = eye + v;
+
+			//cout << glm::dot(v, up) << endl;  //works pretty good =)
+
+			//turn right on a
+
+			glm::vec3 ort = glm::cross(v, up); 
+			ort /= len(ort); 
+			cen += ort * a; 
+
+			up /= len(up); 
+			v = cen - eye; 
+			v /= len(v); 
+			v *= 3.0; 
+			cen = eye + v;
+
+			//cout << glm::dot(v, up) << endl << endl; works well too
 		}
 		else
 		{
 			mouseX = -1; mouseY = -1;
 		}
 	}
-	
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -298,7 +388,8 @@ int main (int argc, char* argv[])
   {
 	  cout << "Error During Initialiation: " << str << endl;
 	  delete planets;
-	  glDeleteTextures(numPlanets, texId);
+	  if (texId)
+		glDeleteTextures(numPlanets, texId);
 	  //start main loop with empty screen
 	  glutDisplayFunc(emptydisplay);
 	  glutMainLoop();
