@@ -1,4 +1,4 @@
-﻿Построение начато 11/21/2013 3:31:45 AM.
+﻿Построение начато 11/22/2013 4:50:41 PM.
      1>Проект "C:\task3\src\Triangles\Triangles.vcxproj" в узле 2 (целевые объекты build).
        Файл проекта содержит ToolsVersion="12.0", не поддерживаемую данной версией MSBuild. Считается, что проект имеет ToolsVersion="4.0".
      1>InitializeBuildStatus:
@@ -6,15 +6,23 @@
        ClCompile:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\freeglut\include /I..\glew\include /I..\glm /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
          main.cpp
-     1>c:\task3\src\triangles\main.cpp(53): warning C4305: инициализация: усечение из "double" к "float"
-     1>c:\task3\src\triangles\main.cpp(53): warning C4305: инициализация: усечение из "double" к "float"
-     1>c:\task3\src\triangles\main.cpp(53): warning C4305: инициализация: усечение из "double" к "float"
-     1>c:\task3\src\triangles\main.cpp(54): warning C4305: инициализация: усечение из "double" к "float"
-     1>c:\task3\src\triangles\main.cpp(54): warning C4305: инициализация: усечение из "double" к "float"
-     1>c:\task3\src\triangles\main.cpp(93): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>c:\task3\src\triangles\main.cpp(56): warning C4305: инициализация: усечение из "double" к "float"
+     1>c:\task3\src\triangles\main.cpp(56): warning C4305: инициализация: усечение из "double" к "float"
+     1>c:\task3\src\triangles\main.cpp(56): warning C4305: инициализация: усечение из "double" к "float"
+     1>c:\task3\src\triangles\main.cpp(58): warning C4305: инициализация: усечение из "double" к "float"
+     1>c:\task3\src\triangles\main.cpp(58): warning C4305: инициализация: усечение из "double" к "float"
+     1>c:\task3\src\triangles\main.cpp(58): warning C4305: инициализация: усечение из "double" к "float"
+     1>c:\task3\src\triangles\main.cpp(59): warning C4305: инициализация: усечение из "double" к "float"
+     1>c:\task3\src\triangles\main.cpp(59): warning C4305: инициализация: усечение из "double" к "float"
+     1>c:\task3\src\triangles\main.cpp(59): warning C4305: инициализация: усечение из "double" к "float"
+     1>c:\task3\src\triangles\main.cpp(98): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdio.h(234): см. объявление "fopen"
-     1>c:\task3\src\triangles\main.cpp(307): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
-     1>c:\task3\src\triangles\main.cpp(308): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+     1>c:\task3\src\triangles\main.cpp(205): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
+     1>c:\task3\src\triangles\main.cpp(206): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
+     1>c:\task3\src\triangles\main.cpp(349): warning C4305: *=: усечение из "double" к "float"
+     1>c:\task3\src\triangles\main.cpp(353): warning C4305: /=: усечение из "double" к "float"
+     1>c:\task3\src\triangles\main.cpp(368): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+     1>c:\task3\src\triangles\main.cpp(369): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\task3\src\..\bin\Win32\Debug\Triangles.exe" /NOLOGO /LIBPATH:..\glew\lib\Release\Win32 /LIBPATH:..\freeglut\lib kernel32.lib opengl32.lib freeglut.lib glew32.lib /MANIFEST /ManifestFile:"Debug\Triangles.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\task3\bin\Win32\Debug\Triangles.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\task3\src\..\bin\Win32\Debug\Triangles.lib" /MACHINE:X86 Debug\main.obj
          Debug\MyObject.obj
@@ -45,4 +53,4 @@
 
 Построение успешно завершено.
 
-Затраченное время: 00:00:01.01
+Затраченное время: 00:00:01.30

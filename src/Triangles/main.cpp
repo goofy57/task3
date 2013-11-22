@@ -28,11 +28,15 @@ int windowHeight = 600;
 int mouseX,mouseY;
 
 //camera position
-glm::vec3 eye(0.0, 0.0, 3.0);
+glm::vec3 eye(0.0, 0.0, 13.0);
 //reference point position
 glm::vec3 cen(0.0, 0.0, 0.0);
 //up vector direction (head of observer)
 glm::vec3 up(0.0, 1.0, 0.0);
+
+double moveUp = 0, moveRight = 0; 
+int IterationsMove = 0;
+int currentPlanetType;
 
 //matrices
 glm::mat4x4 modelViewMatrix;
@@ -43,15 +47,16 @@ glm::mat4x4 normalMatrix;
 ///defines drawing mode
 bool useTexture = true;
 bool useMove = true; 
+float changeSpeed = 1.0f;
 
-const int numPlanets = 4; 
-const char * paths[] = {"C:\\task3\\src\\models\\sun.bmp", "C:\\task3\\src\\models\\mercury.bmp", "C:\\task3\\src\\models\\venus.bmp", "C:\\task3\\src\\models\\earth.bmp"};
+const int numPlanets = 5; 
+const char * paths[] = {"C:\\task3\\src\\models\\sun.bmp", "C:\\task3\\src\\models\\mercury.bmp", "C:\\task3\\src\\models\\venus.bmp", "C:\\task3\\src\\models\\earth.bmp", "C:\\task3\\src\\models\\stars.bmp"};
 GLubyte * imgData[numPlanets]; 
 MyObject *planets;
-float plantetsCenters[][3] = {{0, 0, -10}, {3, 0, -10}, {5, 0, -10}, {7, 0, -10}};
-float radii[] = {2.0f, 1.0f, 1.0f, 1.0f};
-float planetsSpeed[] = {0.00, 0.05, 0.05, 0.08};
-float planetsRotationSpeed[] = {0.00, 0.05, 0.06, 1}; 
+float plantetsCenters[][3] = {{0, 0, 0}, {3, 0, 0}, {5, 0, 0}, {7, 0, 0}, {0.01, 0.01, 0.01}};
+float radii[] = {2.0f, 1.0f, 1.0f, 1.0f, 100.0f};
+float planetsSpeed[] = {0.00, 0.05, 0.05, 0.08, 0.00};
+float planetsRotationSpeed[] = {0.00, 0.01, 0.01, 1.01, 0.00}; 
 
 //texture identificator
 GLuint *texId;
@@ -91,6 +96,7 @@ void initTexture()
 
 		imgData[i] = new GLubyte[width * height * 3];  
 		FILE * inp = fopen(paths[i], "rb"); 
+		fseek(inp, 54, SEEK_SET);
 		fread(imgData[i], 1, width * height * 3, inp); 
 		for (int j = 0; j < width * height; j++)
 		{
@@ -143,15 +149,62 @@ void reshape(int width, int height)
   float fieldOfView = 45.0f;
   float aspectRatio = float(width)/float(height);
   float zNear = 0.1f;
-  float zFar = 100.0f;
+  float zFar = 1000000.0f;
   //set projection matrix
   projectionMatrix = glm::perspective(fieldOfView,aspectRatio,zNear,zFar);
+}
+
+inline float sqr(float x)
+{
+	return x * x; 
+}
+
+float len(glm::vec3 & v)
+{
+	return sqrt(sqr(v.x) + sqr(v.y) + sqr(v.z)); 
+}
+
+void turnUp(float b)
+{
+	glm::vec3 v = cen - eye; 
+	cen += up * b; 
+	up -= v / 3.0f * b / 3.0f;
+
+	up /= len(up); 
+	v = cen - eye; 
+	v /= len(v); 
+	v *= 3.0; 
+	cen = eye + v;
+
+	//cout << glm::dot(v, up) << endl;  //works pretty good =)
+}
+
+void turnRight(float a)
+{
+	glm::vec3 v = cen - eye;
+	glm::vec3 ort = glm::cross(v, up); 
+	ort /= len(ort); 
+	cen += ort * a; 
+
+	up /= len(up); 
+	v = cen - eye; 
+	v /= len(v); 
+	v *= 3.0; 
+	cen = eye + v;
+
+	//cout << glm::dot(v, up) << endl << endl; works well too
 }
 
 ////////////////////////////////////////////////////////////////////
 ///actions for single frame
 void display()
 {
+	if (IterationsMove)
+	{
+		IterationsMove--; 
+		turnUp(moveUp); 
+		turnRight(moveRight);
+	}
   glClearColor(0,0,0,0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -160,7 +213,6 @@ void display()
   
   for (int i = 0; i < numPlanets; i++)
   {
-
 	  glUseProgram(shaderProgram.programObject);
 
 	  //camera matrix. camera is placed in point "eye" and looks at point "cen".
@@ -169,7 +221,7 @@ void display()
 	  glm::mat4x4 modelMatrix = glm::translate(glm::mat4(),glm::vec3(0,0,0));
 
 	  if (useMove)
-		  planets[i].updateAngles();
+		  planets[i].updateAngles(changeSpeed);
 	  glm::mat4x4 rotateMatrix = glm::rotate(glm::mat4(), planets[i].getAngleAroundSun(), glm::vec3(0.0f,0.0f,1.0f));
 	  
 	  glm::mat4x4 rotateAroundItselfMatrix = glm::rotate(glm::mat4(), planets[i].getAngleAroundItself(), glm::vec3(0.0f,0.0f,1.0f));
@@ -183,7 +235,12 @@ void display()
 	  //modelViewMatrix consists of viewMatrix and modelMatrix
 	  modelViewMatrix = viewMatrix*modelMatrix*rotateMatrix;
 	  //calculate normal matrix 
-	  normalMatrix = glm::inverseTranspose(modelViewMatrix);
+	 
+	  if (i)
+		  normalMatrix = glm::inverseTranspose(glm::lookAt(glm::vec3(0,0,0),cents,up) * modelMatrix * translationMatrix * rotateAroundItselfMatrix * reverseTranslationMatrix);
+	  else 
+		  normalMatrix = glm::inverseTranspose(glm::mat4(0.0f));
+	  
 	  //finally calculate modelViewProjectionMatrix
 	  modelViewProjectionMatrix = projectionMatrix*modelViewMatrix;
 
@@ -191,6 +248,9 @@ void display()
 	  glBindTexture(GL_TEXTURE_2D, texId[i]);
   
 	  //pass variables to the shaders
+	  if (i) currentPlanetType = 0;
+	  if (i == 4) currentPlanetType = 2; 
+	  if (i == 0) currentPlanetType = 1; 
 
 	  int locMV = glGetUniformLocation(shaderProgram.programObject,"modelViewMatrix");
 	  if (locMV>-1)
@@ -208,6 +268,10 @@ void display()
 	  int locFlag = glGetUniformLocation(shaderProgram.programObject,"useTexture");
 	  if (locFlag>-1)
 		  glUniform1i(locFlag,useTexture);
+	  int locType = glGetUniformLocation(shaderProgram.programObject,"currentPlanetType");
+	  if (locType>-1)
+		  glUniform1i(locType,currentPlanetType);
+
   
 	  //if there is some problem
 	  if (locMV<0 || locN<0 || locP<0 || texLoc <0 || locFlag<0)
@@ -224,8 +288,7 @@ void display()
 	  }
   }
 	//end frame visualization
-	glutSwapBuffers();
-
+	glutSwapBuffers(); 
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -234,16 +297,6 @@ void update()
 {
 	//make animation
 	glutPostRedisplay();
-}
-
-inline float sqr(float x)
-{
-	return x * x; 
-}
-
-float len(glm::vec3 & v)
-{
-	return sqrt(sqr(v.x) + sqr(v.y) + sqr(v.z)); 
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -291,6 +344,14 @@ void keyboard(unsigned char key, int mx, int my)
 		eye -= v;
 		cen -= v; 
 	}
+	if (key == '+') 
+	{
+		changeSpeed *= 1.1; 
+	}
+	if (key == '-')
+	{
+		changeSpeed /= 1.1;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -313,33 +374,9 @@ void mouse(int button, int mode,int posx, int posy)
 			a /= l; 
 			b /= l; 
 
-			//turn up on b
-
-			glm::vec3 v = cen - eye; 
-			cen += up * b; 
-			up -= v / 3.0f * b / 3.0f;
-
-			up /= len(up); 
-			v = cen - eye; 
-			v /= len(v); 
-			v *= 3.0; 
-			cen = eye + v;
-
-			//cout << glm::dot(v, up) << endl;  //works pretty good =)
-
-			//turn right on a
-
-			glm::vec3 ort = glm::cross(v, up); 
-			ort /= len(ort); 
-			cen += ort * a; 
-
-			up /= len(up); 
-			v = cen - eye; 
-			v /= len(v); 
-			v *= 3.0; 
-			cen = eye + v;
-
-			//cout << glm::dot(v, up) << endl << endl; works well too
+			moveUp = (moveUp * IterationsMove + b) / 100; 
+			moveRight = (moveRight * IterationsMove + a) / 100; 
+			IterationsMove = 100; 
 		}
 		else
 		{

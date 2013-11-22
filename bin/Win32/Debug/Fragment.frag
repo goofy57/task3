@@ -5,6 +5,7 @@
 //if is true, then use Texture
 //otherwise draw gradient
 uniform int useTexture;
+uniform int currentPlanetType;
 
 //texture object
 uniform sampler2D textureSampler;
@@ -60,36 +61,23 @@ vec3 hsv2rgb(vec3 hsvColor)
 
 //main function
 
-//TODO: you should use VertexIn.normal value to evaluate Phong Lightning for this pixel
-// 
-
 void main()
 {
 	if (useTexture>0)
-		//take color from texture using texture2D
 		fragColor = vec4(texture(textureSampler,VertexIn.texcoord.xy).rgb,1);
 	
+	if (currentPlanetType == 0)
+	{
+		vec4 Iamb = vec4(-0.3, -0.3, -0.3, 0.5);
 
-	////--------------------------
-	vec4 result = vec4(0.0);
-    vec3 l;
-    
-    l = normalize(-VertexIn.position);
-    
-	vec3 e = normalize(-VertexIn.position);
-    vec3 r = normalize(-reflect(l, VertexIn.normal));
- 
-    vec4 Iamb = vec4(0.1, 0.1, 0.1, 0.1); //ambient
- 
-    vec4 Idiff = vec4(0.1, 0.1, 0.1, 0.1) * max(dot(VertexIn.normal, l), 0.0); //diffuse
-    Idiff = clamp(Idiff, 0.0, 0.1);
- 
-    vec4 Ispec = vec4(0.1, 0.1, 0.1, 0.1) //specular
-                 * pow(max(dot(r, e), 0.0),
-                       0.1);
-    Ispec = clamp(Ispec, 0.0, 0.1);
- 
-    result += Iamb + Idiff + Ispec;
- 
-    fragColor = fragColor + result;
+		vec4 Idiff = vec4(0.8, 0.8, 0.8, 0.7) * max(dot(VertexIn.normal, normalize(-VertexIn.position)), 0.0); //diffuse
+		Idiff = clamp(Idiff, 0.0, 1.0);
+  
+		fragColor += Iamb + Idiff;
+	}
+	else
+	if (currentPlanetType == 1)
+	{
+		fragColor += vec4(0.3, 0.3, 0.3, 0.5);
+	}
 }

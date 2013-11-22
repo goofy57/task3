@@ -91,10 +91,10 @@ void MyObject::Draw()
 	glBindVertexArray(0);
 }
 
-void MyObject::updateAngles()
+void MyObject::updateAngles(float sp)
 {
-	rotSun += speed; 
-	rotSelf += rotSpeed; 
+	rotSun += sp * speed; 
+	rotSelf += sp * rotSpeed; 
 }
 
 float MyObject::getAngleAroundItself()

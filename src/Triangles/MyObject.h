@@ -33,7 +33,7 @@ public:
 	void initGLBuffers(unsigned int programId, const char* posName,const char* norName,const char* texName);
 	void fillData(float x = 0.0f, float y = 0.0f, float z = 0.0f, float _speed = 0.0f, float _rotSpeed = 0.0f, float _radius = 1.0f); 
 	glm::vec3 getCenterVec3();
-	void updateAngles(); 
+	void updateAngles(float sp); 
 	float getAngleAroundSun();
 	float getAngleAroundItself(); 
 	float getSpeed();
