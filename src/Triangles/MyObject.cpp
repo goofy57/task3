@@ -10,22 +10,35 @@ MyObject::MyObject():
 	pData(0),
 	pIndexes(0), 
 	radius(1.0),
-	speed(1), 
 	centx(0), 
 	centy(0), 
 	centz(0), 
 	rotSun(0), 
 	rotSelf(0) {}
 
-void MyObject::fillData(float x, float y, float z, float _speed, float _rotSpeed, float _radius)
+void MyObject::fillData(double _x, double _y, double _z, double _rotSpeed, double _radius, double _ownAxisAngle, double _mass, double _vx, double _vy, double _vz)
 {
-	centx = x; 
-	centy = y; 
-	centz = z; 
-	speed = _speed; 
+	centx = x = _x; 
+	centy = y = _y; 
+	centz = z = _z; 
 	rotSpeed = _rotSpeed; 
 	radius = _radius; 
+	ownAxisAngle = _ownAxisAngle;
+	mass = _mass; 
+	vx = _vx; 
+	vy = _vy; 
+	vz = _vz;
 	generateData();
+}
+
+glm::dvec3 MyObject::getVelocity()
+{
+	return glm::dvec3(vx, vy, vz); 
+}
+
+double MyObject::getMass()
+{
+	return mass;
 }
 
 glm::vec3 MyObject::getCenterVec3()
@@ -45,10 +58,11 @@ MyObject::~MyObject(void)
 	}
 }
 
-float MyObject::getSpeed()
+glm::dvec3 MyObject::getRealCenter()
 {
-	return speed; 
+	return glm::dvec3(x, y, z); 
 }
+
 
 void MyObject::initGLBuffers(GLuint programId, const char* posName,const char* norName,const char* texName)
 {
@@ -93,8 +107,8 @@ void MyObject::Draw()
 
 void MyObject::updateAngles(float sp)
 {
-	rotSun += sp * speed; 
 	rotSelf += sp * rotSpeed; 
+	while (rotSelf > 360) rotSelf -= 360; 
 }
 
 float MyObject::getAngleAroundItself()
@@ -105,6 +119,11 @@ float MyObject::getAngleAroundItself()
 float MyObject::getAngleAroundSun()
 {
 	return rotSun; 
+}
+
+float MyObject::getOwnAxisAngle()
+{
+	return ownAxisAngle;
 }
 
 void MyObject::generateData()
@@ -141,7 +160,7 @@ void MyObject::generateData()
 			float x = smallr * cos(phi); 
 			float y = smallr * sin(phi); 
 
-			data->pos = glm::vec3(centx + x * radius, centy + y * radius, centz + z * radius);
+			data->pos = glm::vec3(centx + x, centy + y, centz + z);
 			data->nor = glm::vec3(x, y, z); 
 			data->tex = glm::vec2(j * 1.0 / (cols - 1), (i + rows / 2) * 1.0 / (rows - 1)); 
 			data++; 
@@ -166,4 +185,14 @@ void MyObject::generateData()
 			*ind++ = p4; 
 		}
 	}
+}
+
+void MyObject::updateVelocity(glm::dvec3 v)
+{
+	vx = v.x, vy = v.y, vz = v.z; 
+}
+
+void MyObject::updateCenters(glm::dvec3 v)
+{
+	x += v.x, y += v.y, z += v.z; 
 }

@@ -5,7 +5,7 @@
 //if is true, then use Texture
 //otherwise draw gradient
 uniform int useTexture;
-uniform int currentPlanetType;
+uniform int perceivesLight;
 
 //texture object
 uniform sampler2D textureSampler;
@@ -63,21 +63,27 @@ vec3 hsv2rgb(vec3 hsvColor)
 
 void main()
 {
-	if (useTexture>0)
-		fragColor = vec4(texture(textureSampler,VertexIn.texcoord.xy).rgb,1);
-	
-	if (currentPlanetType == 0)
-	{
-		vec4 Iamb = vec4(-0.3, -0.3, -0.3, 0.5);
+	float alpha = 1; 
+	if (perceivesLight == 3)
+		alpha = 0.1;
 
-		vec4 Idiff = vec4(0.8, 0.8, 0.8, 0.7) * max(dot(VertexIn.normal, normalize(-VertexIn.position)), 0.0); //diffuse
+	if (useTexture>0)
+		fragColor = vec4(texture(textureSampler,VertexIn.texcoord.xy).rgb, alpha);
+	
+	if (perceivesLight == 1 || perceivesLight == 3)
+	{
+		vec4 Iamb = vec4(-0.3, -0.3, -0.3, -0.07);
+
+		vec4 Idiff = vec4(0.8, 0.8, 0.8, max(dot(VertexIn.normal, normalize(-VertexIn.position)), 0.0) / 2) * max(dot(VertexIn.normal, normalize(-VertexIn.position)), 0.0); //diffuse
 		Idiff = clamp(Idiff, 0.0, 1.0);
   
+		//fragColor = vec4(VertexIn.normal, 1.0);
 		fragColor += Iamb + Idiff;
 	}
 	else
-	if (currentPlanetType == 1)
+	if (perceivesLight == 0)
 	{
 		fragColor += vec4(0.3, 0.3, 0.3, 0.5);
 	}
+	
 }

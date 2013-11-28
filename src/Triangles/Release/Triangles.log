@@ -1,0 +1,9 @@
+﻿Построение начато 11/26/2013 3:59:26 AM.
+     1>Проект "C:\task3\src\Triangles\Triangles.vcxproj" в узле 2 (целевые объекты build).
+       Файл проекта содержит ToolsVersion="12.0", не поддерживаемую данной версией MSBuild. Считается, что проект имеет ToolsVersion="4.0".
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Platforms\Win32\Microsoft.Cpp.Win32.Targets(511,5): error MSB8008: указанный набор инструментов платформы (v120) не установлен или недопустим. Убедитесь, что выбрано поддерживаемое значение PlatformToolset.
+     1>Построение проекта "C:\task3\src\Triangles\Triangles.vcxproj" завершено (целевые объекты build) с ошибкой.
+
+СБОЙ построения.
+
+Затраченное время: 00:00:00.03
